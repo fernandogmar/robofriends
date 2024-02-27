@@ -1,66 +1,53 @@
-import React, { Component } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import CardDeck from '../components/CardDeck';
 import ErrorBoundry from '../components/ErrorBoundry';
 import Scroll from '../components/Scroll';
 import SearchBox from '../components/SearchBox';
 import './App.css';
 
-class App extends Component {
-    /*constructor() {
-        super();
+const App = () => {
+    const [ robots, setRobots ] = useState([]);
+    const [ searchfield, setSearchfield] = useState('');
 
-        this.state = {
-            robots: [],
-            searchfield: ''
-        };
-    }*/
-
-    state = {
-        robots: [],
-        searchfield: ''
-    }
-
-    componentDidMount() {
-        /*this.setState({
-            robots: await fetch('https://jsonplaceholder.typicode.com/users')
+    useEffect(
+        () => {
+            fetch('https://jsonplaceholder.typicode.com/users')
             .then((response) => response.json())
-        });*/
-        fetch('https://jsonplaceholder.typicode.com/users')
-        .then((response) => response.json())
-        .then(robots => this.setState({ robots }))
-    }
+            .then(setRobots)
+        },
+        []
+    );
 
-    handleSearchChange = (event) => {
-        this.setState({ searchfield: event.target.value });
-    }
-
-    render() {
-        const { robots, searchfield } = this.state;
-        const filteredRobots = robots.filter(
+    const filteredRobots = useMemo(
+        () => robots.filter(
             (robot) => robot.name.toLowerCase().includes(searchfield.toLowerCase())
-        );
+        ),
+        [robots, searchfield]
+    );
 
-        if(robots.length) {
-            return (
-                <div className="tc">
-                    <h1 className="f1">RoboFriends</h1>
-                    <SearchBox onSearchChange={this.handleSearchChange} />
-                    <Scroll>
-                        <ErrorBoundry>
-                            <CardDeck robots={filteredRobots} />
-                        </ErrorBoundry>
-                    </Scroll>
-                </div>
-            );
-        }
+    const handleSearchChange = (event) => {
+        setSearchfield(event.target.value);
+    }
 
+    if(robots.length) {
         return (
             <div className="tc">
-                <h1 className="f1">Loading...</h1>
+                <h1 className="f1">RoboFriends</h1>
+                <SearchBox onSearchChange={handleSearchChange} />
+                <Scroll>
+                    <ErrorBoundry>
+                        <CardDeck robots={filteredRobots} />
+                    </ErrorBoundry>
+                </Scroll>
             </div>
         );
-
     }
+
+    return (
+        <div className="tc">
+            <h1 className="f1">Loading...</h1>
+        </div>
+    );
 };
 
 export default App;
